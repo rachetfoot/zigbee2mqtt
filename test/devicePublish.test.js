@@ -50,6 +50,20 @@ describe('DevicePublish', () => {
             chai.assert.deepEqual(zigbee.publish.getCall(0).args[6], null);
         });
 
+        it('Should publish messages to zigbee devices using sub-topic', () => {
+            zigbee.publish.resetHistory();
+            zigbee.getDevice = sinon.fake(addr => addr === '0x12345678' ? {modelId: 'TRADFRI bulb E27 CWS opal 600lm'} : null);
+            devicePublish.onMQTTMessage('zigbee2mqtt/0x12345678/brightness/set', '200');
+            chai.assert.isTrue(zigbee.publish.calledOnce);
+            chai.assert.strictEqual(zigbee.publish.getCall(0).args[0], '0x12345678');
+            chai.assert.strictEqual(zigbee.publish.getCall(0).args[1], 'genLevelCtrl');
+            chai.assert.strictEqual(zigbee.publish.getCall(0).args[2], 'moveToLevelWithOnOff');
+            chai.assert.strictEqual(zigbee.publish.getCall(0).args[3], 'functional');
+            chai.assert.deepEqual(zigbee.publish.getCall(0).args[4], {level: '200', transtime: 0});
+            chai.assert.deepEqual(zigbee.publish.getCall(0).args[5], cfg.default);
+            chai.assert.deepEqual(zigbee.publish.getCall(0).args[6], null);
+        });
+
         it('Should publish messages to zigbee devices when brightness is in %', () => {
             zigbee.publish.resetHistory();
             zigbee.getDevice = sinon.fake.returns({modelId: 'TRADFRI bulb E27 CWS opal 600lm'});
